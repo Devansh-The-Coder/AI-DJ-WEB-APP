@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI DJ WEB APP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.js"></script>
+  <script src="https://unpkg.com/ml5@0.4.3/dist/ml5.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.0.0/lib/addons/p5.sound.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/addons/p5.sound.min.js"></script>
+  
+</head>
+<body background="Music.jpg">
+<center>
+    <h3 style="color: white;">AI DJ WEB APP<br><br>
+        <br>
+        <span style="color: white;">Move your left and right wrist up and down to switch<br> between Harry Potter and 3 Corner's Music</span>
+    </h3>
+
+    
+
+    <br><br><br>
+
+    <button class="btn btn-success play_button" style="border-radius: 30px;">Song Name: </button>
+    <br>
+
+    <h3 id="songName"></h3>
+
+</center>
+
+<script src="main.js"></script>
+</body>
+</html>
+
+<script>
+    function setup() 
+{
+    canvas =  createCanvas(450, 450);
+    canvas.center();
+
+    video = createCapture(VIDEO);
+    video.hide();
+
+    poseNet = ml5.poseNet(video, modelLoaded);//C128
+    poseNet.on('pose', gotPoses);
+}
+
+song1 = "";
+song2 = "";
+
+function preload()
+{
+    song = loadSound("music.mp3");
+    song2 = loadSound("Big.mp3")
+}
+
+
+function modelLoaded() 
+{
+    console.log('PoseNet Is Initialized');
+}
+
+/*Score means the confidence that a body part has been detected OR a body part is in
+front of the webcam. So whenever a score is greater than 0.2, it means the body part has
+been detected OR a body part is in front of the webcam*/
+
+scoreRightWrist = 0;
+scoreLeftWrist = 0;
+
+rightWristX = 0;
+rightWristY = 0;
+
+leftWristX = 0;
+leftWristY = 0;
+
+song1Status = "";
+song2Status = "";                          
+
+function draw() {
+    image(video, 0, 0, 600, 500);// C127
+
+    fill("#FF0000");// " Red" C129
+    stroke("#FF0000");
+
+song1Status = song1.isPlaying()
+song2Status = song2.isPlaying()
+
+if (scoreLeftWrist > 0,2) {
+    circle(leftWristX,leftWristY,20);
+    song1.stop();
+    if (song2Status == false) {
+        song2.play();
+        document.getElementById("songName").innerHTML = "Playing Harry Potter"
+    }
+}
+
+
+if (scoreRightWrist > 0,2) {
+    circle(rightWristX,rightWristY,20);
+    song2.stop();
+    if (song1Status == false) {
+        song1.play();
+        document.getElementById("songName").innerHTML = "Playing 3 Corner"
+    }
+}
+
+
+    //C130
+
+}
+
+
+function gotPoses(results)
+{
+  if(results.length > 0)
+  {
+    console.log(results);//C128
+    scoreRightWrist = results[0].pose.keypoints[10].score;//C129
+    scoreLeftWrist =  results[0].pose.keypoints[9].score;
+    console.log("scoreRightWrist = " + scoreRightWrist + " scoreLeftWrist = " + scoreLeftWrist);
+    
+    rightWristX = results[0].pose.rightWrist.x;//C128
+    rightWristY = results[0].pose.rightWrist.y;
+    console.log("rightWristX = " + rightWristX +" rightWristY = "+ rightWristY);
+
+    leftWristX = results[0].pose.leftWrist.x;//C128
+    leftWristY = results[0].pose.leftWrist.y;//C128
+    console.log("leftWristX = " + leftWristX +" leftWristY = "+ leftWristY);
+        
+  }
+}
+</script>
+<style>
+    .heading
+{
+  font-size: 23px;
+  width: 100%;
+  margin: 0px;
+  color: blue;
+}
+.note
+{
+  font-size: 16px;
+  color: black;
+  white-space: pre-line;
+}
+body
+{
+  background-size: cover; 
+}
+  .div_speed
+  {
+    float: left;
+  }
+  .div_speed_img
+  {
+    width: 200px; 
+    border-radius: 100px;
+  }
+  #speed
+  {
+    font-size: 23px;
+    margin: 15px;
+  }
+  .div_volume
+  {
+    float: right; 
+  }
+  .div_volume_img
+  {
+    width: 200px; 
+    border-radius: 100px;
+  }
+  #volume
+  {
+    font-size: 23px;
+    margin: 15px;
+  }
+   .play_button
+  {
+    width: 200px;
+    font-size: 25px;
+  }
+    canvas 
+  {
+    border:5px solid white;
+    border-radius:20px;
+    margin-top: 300px;
+  }
+</style>
